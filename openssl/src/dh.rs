@@ -77,15 +77,18 @@ impl Dh<Params> {
     ///
     /// This corresponds to [`DH_generate_parameters`].
     ///
-    /// [`DH_generate_parameters`]: https://www.openssl.org/docs/man1.1.0/crypto/DH_generate_parameters.html
+    /// [`DH_new`]: https://www.openssl.org/docs/man1.1.0/crypto/DH_new.html
+    /// [`DH_generate_parameters_ex`]: https://www.openssl.org/docs/man1.1.0/crypto/DH_generate_parameters.html
     pub fn generate_params(prime_len: u32, generator: u32) -> Result<Dh<Params>, ErrorStack> {
         unsafe {
-            Ok(Dh::from_ptr(cvt_p(ffi::DH_generate_parameters(
+            let dh = Dh::from_ptr(cvt_p(ffi::DH_new())?);
+            cvt(ffi::DH_generate_parameters_ex(
+                dh.0,
                 prime_len as i32,
                 generator as i32,
-                None,
                 ptr::null_mut(),
-            ))?))
+            ))?;
+            Ok(dh)
         }
     }
 
